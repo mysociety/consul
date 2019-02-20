@@ -17,7 +17,7 @@ services:
 
   # service configuration for our dockerized Rails app
   app:
-    image: mysocietyorg/consul:0.0.1
+    image: sagepe/consul:0f0669339
     command: bundle exec rails s -p 3000 -b '0.0.0.0'
     working_dir: /var/www/consul
     volumes:
