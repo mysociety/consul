@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+MODE=${1:-production}
+
+case "$MODE" in
+  development)
+    echo "==> Starting development stack..."
+    export RAILS_ENV=development
+    docker-compose -d docker-compose.yml up -d
+    ;;
+  production)
+    echo "==> Starting production stack..."
+    export RAILS_ENV=production
+    docker-compose -f docker-compose.production.yml up -d
+    ;;
+  *)
+    echo "==> Unknown mode, ${MODE}, aborting."
+    exit 1
+    ;;
+esac

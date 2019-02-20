@@ -1,0 +1,41 @@
+version: '3'
+services:
+  # service configuration for our database
+  database:
+    # use the preferred version of the official Postgres image
+    # see https://hub.docker.com/_/postgres/
+    image: postgres:9.4.5
+    environment:
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-password}"
+    # persist the database between containers by storing it in a volume
+    volumes:
+      - consul-pgdata:/var/lib/postgresql/data
+
+  # service configuration for memcache
+  memcache:
+    image: memcached:1.5.12
+
+  # service configuration for our dockerized Rails app
+  app:
+    image: mysocietyorg/consul:0.0.1
+    command: bundle exec rails s -p 3000 -b '0.0.0.0'
+    working_dir: /var/www/consul
+    volumes:
+      - ./config/secrets.yml.deploy:/var/www/consul/config/secrets.yml:ro
+      - ./config/database.yml.deploy:/var/www/consul/config/database.yml:ro
+      - ./config/application_custom.rb:/var/www/consul/config/application_custom.rb:ro
+      - ./config/environments/${RAILS_ENV:-production}.rb.deploy:/var/www/consul/config/environments/${RAILS_ENV:-production}.rb:ro
+    environment:
+      MEMCACHED_SERVERS: "memcache:11211"
+      RAILS_ENV: "${RAILS_ENV:-production}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-password}"
+      SERVER_NAME: "${SERVER_NAME:-consul.127.0.0.1.nip.io}"
+      RAILS_SERVE_STATIC_FILES: "true"
+    depends_on:
+      - database
+      - memcache
+    ports:
+      - "3000:3000"
+
+volumes:
+  consul-pgdata:
