@@ -1,3 +1,5 @@
+return if ENV['ASSETS_PRECOMPILE']
+
 devise_for :users, controllers: {
                      registrations: 'users/registrations',
                      sessions: 'users/sessions',
